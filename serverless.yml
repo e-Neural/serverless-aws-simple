@@ -1,0 +1,33 @@
+
+service: e-neural-simple
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: dev
+  region: us-east-1
+  environment:
+    API_REGION: "${self:provider.region}"
+    # Variable System Manager
+    ENE_CONFIG: ${ssm:/dev/e-neural/config} 
+    
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ssm:Describe*
+        - ssm:Get*
+        - ssm:List*
+      Resource: "*"
+
+functions:
+  publicEndpoint:
+    handler: modules/public.list
+    memorySize: 128
+    description: Return public.
+    events:
+      - http:
+          path: api/public
+          method: get
+          cors: true
